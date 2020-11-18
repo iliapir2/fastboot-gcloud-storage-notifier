@@ -1,11 +1,8 @@
 {
   "name": "fastboot-gcloud-storage-notifier",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A FastBoot App Server Notifier for gcloud Storage",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "main": "index.js",  
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EmberSherpa/fastboot-gcloud-storage-notifier.git"
