@@ -1,8 +1,8 @@
 "use strict";
 
-let gcloud = require('gcloud');
+const { Storage } = require("@google-cloud/storage");
 
-let storage = gcloud.storage();
+const storage = new Storage();
 
 const DEFAULT_POLL_TIME = 3 * 1000;
 
@@ -17,30 +17,31 @@ class GCSNotifier {
   subscribe(notify) {
     this.notify = notify;
 
-    return this.getCurrentLastModified()
-      .then(() => this.schedulePoll());
+    return this.getCurrentLastModified().then(() => this.schedulePoll());
   }
 
   getLastModified() {
-      let file = storage.bucket(this.bucket).file(this.key);
-      
-      return new Promise(function(resolve, reject){
-        file.get(function(err, file, apiResponse){
-          if (err) {
-            reject(err);
-          }
-          resolve(apiResponse.updated);
-        });
+    const file = storage.bucket(this.bucket).file(this.key);
+
+    return new Promise(function (resolve, reject) {
+      file.get(function (err, file, apiResponse) {
+        if (err) {
+          reject(err);
+        }
+        resolve(apiResponse.updated);
       });
+    });
   }
-  
+
   getCurrentLastModified() {
     return this.getLastModified()
-      .then(LastModified => {
+      .then((LastModified) => {
         this.lastModified = LastModified;
       })
       .catch(() => {
-        this.ui.writeError('error fetching gcloud Storage last modified; notifications disabled');
+        this.ui.writeError(
+          "error fetching gcloud Storage last modified; notifications disabled"
+        );
       });
   }
 
@@ -51,21 +52,23 @@ class GCSNotifier {
   }
 
   poll() {
-    this.getLastModified()
-      .then(LastModified => {
-        this.compareLastModifieds(LastModified);
-        this.schedulePoll();
-      });
+    this.getLastModified().then((LastModified) => {
+      this.compareLastModifieds(LastModified);
+      this.schedulePoll();
+    });
   }
 
   compareLastModifieds(newLastModified) {
     if (newLastModified !== this.lastModified) {
-      this.ui.writeLine('config modified; old=%s; new=%s', this.lastModified, newLastModified);
+      this.ui.writeLine(
+        "config modified; old=%s; new=%s",
+        this.lastModified,
+        newLastModified
+      );
       this.lastModified = newLastModified;
       this.notify();
     }
   }
 }
-
 
 module.exports = GCSNotifier;
